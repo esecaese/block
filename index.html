@@ -30,6 +30,9 @@
         .mode-btn { padding: 20px 40px; font-size: 1.5rem; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: transform 0.2s; }
         .mode-btn:hover { transform: scale(1.05); }
 
+        /* Footer específico del selector (posicionado absoluto abajo) */
+        .selector-footer { position: absolute; bottom: 30px; width: 100%; text-align: center; }
+
         /* --- MODO OPERADOR (Dark Mode) --- */
         #operator-view { background: var(--bg-dark); height: 100%; overflow-y: auto; padding: 15px; padding-bottom: 70px; box-sizing: border-box; position: relative; }
 
@@ -106,7 +109,7 @@
         
         /* Footer TV */
         .tv-footer { grid-column: 1 / -1; background: #020617; padding: 15px; border-top: 2px solid var(--border); }
-        .tv-footer .footer-logo { max-height: 40px; /* Un pelin más grande en TV */ }
+        .tv-footer .footer-logo { max-height: 40px; }
         .tv-footer .footer-container { font-size: 1.2rem; }
 
         /* --- MODAL DARK --- */
@@ -125,6 +128,13 @@
     <div id="selector">
         <button class="mode-btn" onclick="initMode('tv')" style="background: var(--gold); color: black;">📺 MODO TV</button>
         <button class="mode-btn" onclick="initMode('op')" style="background: #333; color: white; border: 1px solid #555;">📱 MODO OPERADOR</button>
+
+        <div class="selector-footer">
+            <div class="footer-container">
+                <img id="selector-footer-logo" class="footer-logo" src="" alt="BLOCK." style="display:none">
+                <span>#<span style="color:var(--gold)">somosblock</span></span>
+            </div>
+        </div>
     </div>
 
     <div id="operator-view" class="hidden">
@@ -251,20 +261,24 @@
             const src = document.getElementById('source-logo').src;
             // Verificar si el usuario pegó el base64
             if(!src.includes('PEGAR_AQUI')) {
-                const opLogo = document.getElementById('op-footer-logo');
-                const tvLogo = document.getElementById('tv-footer-logo');
+                const logos = [
+                    document.getElementById('op-footer-logo'),
+                    document.getElementById('tv-footer-logo'),
+                    document.getElementById('selector-footer-logo')
+                ];
                 
-                opLogo.src = src;
-                opLogo.style.display = 'block';
-                
-                tvLogo.src = src;
-                tvLogo.style.display = 'block';
+                logos.forEach(logo => {
+                    if(logo) {
+                        logo.src = src;
+                        logo.style.display = 'block';
+                    }
+                });
             }
         });
 
         // === CONFIGURACIÓN ===
-        const DB_KEY = 'halterofilia_block_v3';
-        const STATE_KEY = 'halterofilia_block_state_v3';
+        const DB_KEY = 'halterofilia_block_v4_final';
+        const STATE_KEY = 'halterofilia_block_state_v4_final';
 
         // === INICIALIZACIÓN ===
         function initMode(mode) {

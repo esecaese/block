@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Textil Completo: Confección & Sublimación</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #475569;
+            --accent: #7c3aed; /* Color para Confección */
+            --subli: #ea580c;   /* Color para Sublimación */
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Layout & Tabs */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .tabs { display: flex; gap: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        .tab-btn { padding: 12px 25px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #9ca3af; border-radius: 6px; transition: all 0.2s; }
+        .tab-btn:hover { background: #e5e7eb; }
+        .tab-btn.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--primary); border: 1px solid #e5e7eb; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: grid; grid-template-columns: 350px 1fr; gap: 20px; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Tarjetas y UI General */
+        .card { background: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600; color: #4b5563; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        
+        button { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600; font-size: 0.95rem; transition: background 0.2s; }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        
+        button.btn-accent { background: var(--accent); }
+        button.btn-subli { background: var(--subli); }
+        button.btn-sm { width: auto; padding: 5px 10px; font-size: 0.8rem; }
+        button.btn-danger { background: var(--danger); }
+
+        /* Stock Displays */
+        .stock-list { display: grid; gap: 8px; }
+        .stock-item { background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .stock-val { font-weight: bold; color: var(--secondary); background: #e2e8f0; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+        
+        /* Input Grid para Talles */
+        .size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+        .size-input div { text-align: center; font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 2px; }
+        .size-input input { text-align: center; margin-bottom: 0; }
+
+        /* Feedback y Alertas */
+        .requirements-box { background: #fff7ed; padding: 12px; border-radius: 6px; border: 1px solid #ffedd5; font-size: 0.85rem; margin-bottom: 15px; }
+        .req-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .req-ok { color: var(--success); }
+        .req-bad { color: var(--danger); font-weight: bold; }
+
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; padding: 10px; background: #f9fafb; color: #6b7280; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+        td { padding: 10px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+        
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .badge-process { background: #fef3c7; color: #92400e; }
+        .badge-done { background: #dcfce7; color: #166534; }
+        .badge-pending { background: #e0e7ff; color: #3730a3; }
+        
+        /* Utilidades */
+        .flex-row { display: flex; gap: 10px; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏭 Sistema Integral de Producción</h1>
+        <button class="btn-sm btn-danger" onclick="resetSystem()">♻️ Resetear Datos</button>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('confection', this)">1. Confección (Fábrica)</button>
+        <button class="tab-btn" onclick="switchTab('sublimation', this)">2. Sublimación (Ventas)</button>
+    </div>
+
+    <div id="confection" class="tab-content active">
+        <aside>
+            <div class="card">
+                <h2>🧵 Depósito de Telas</h2>
+                <div id="rawMaterialList" class="stock-list"></div>
+                
+                <div style="margin-top:15px; padding-top:15px; border-top: 1px dashed #e5e7eb;">
+                    <label>Ingreso de Mercadería</label>
+                    <div class="flex-row">
+                        <select id="fabricIngressType">
+                            <option value="algodon_blanco">Algodón Blanco</option>
+                            <option value="algodon_negro">Algodón Negro</option>
+                            <option value="ribb_rojo">Ribb Rojo</option>
+                            <option value="ribb_negro">Ribb Negro</option>
+                        </select>
+                        <input type="number" id="fabricIngressQty" placeholder="Kg" style="width: 80px;">
+                    </div>
+                    <button class="btn-sm btn-accent" onclick="addRawMaterial()">+ Agregar Stock</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 style="color: var(--accent);">✂️ Nueva Orden de Corte</h2>
+                <form id="cutOrderForm">
+                    <label>Modelo a Fabricar (Receta)</label>
+                    <select id="modelSelect" onchange="calculateRequirements()">
+                        </select>
+
+                    <label>Cantidad Total (Unidades)</label>
+                    <input type="number" id="targetQty" placeholder="Ej: 100" oninput="calculateRequirements()">
+
+                    <div class="requirements-box">
+                        <div style="margin-bottom:5px; font-weight:bold;">Requerimiento de Materiales:</div>
+                        <div id="reqList">Esperando cantidad...</div>
+                    </div>
+
+                    <label>Curva de Talles (Debe sumar el total)</label>
+                    <div class="size-grid">
+                        <div class="size-input"><div>S</div><input type="number" id="sizeS" value="0"></div>
+                        <div class="size-input"><div>M</div><input type="number" id="sizeM" value="0"></div>
+                        <div class="size-input"><div>L</div><input type="number" id="sizeL" value="0"></div>
+                        <div class="size-input"><div>XL</div><input type="number" id="sizeXL" value="0"></div>
+                    </div>
+
+                    <button type="submit" id="btnCreateCut" class="btn-accent" disabled>Generar Orden</button>
+                </form>
+            </div>
+        </aside>
+
+        <main>
+            <div class="card">
+                <h2>📋 Órdenes en Proceso</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modelo</th>
+                            <th>Curva (S/M/L/XL)</th>
+                            <th>Estado</th>
+                            <th class="text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cutTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="card" style="border: 2px solid #bbf7d0;">
+                <h2 style="color: #166534; border-bottom-color: #bbf7d0;">👕 Stock de Productos Terminados</h2>
+                <div class="stock-list" id="finishedGoodsList">
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="sublimation" class="tab-content">
+        <aside>
+            <div class="card">
+                <h2>📦 Insumos de Impresión</h2>
+                <div class="stock-list" id="suppliesList"></div>
+            </div>
+
+            <div class="card">
+                <h2 style="color: var(--subli);">🎨 Nueva Venta / Pedido</h2>
+                <form id="clientOrderForm">
+                    <label>Cliente</label>
+                    <input type="text" id="clientName" placeholder="Nombre del cliente" required>
+
+                    <label>Prenda Base (Del Stock)</label>
+                    <select id="baseGarmentSelect">
+                        </select>
+
+                    <label>Tamaño del Diseño</label>
+                    <select id="designSize" onchange="calculatePrice()">
+                        <option value="a4">Hoja A4 (Estándar)</option>
+                        <option value="a3">Hoja A3 (Grande)</option>
+                    </select>
+
+                    <label>Nivel de Saturación (Consumo Tinta)</label>
+                    <select id="inkSaturation" onchange="calculatePrice()">
+                        <option value="low">Baja (Lineas, Texto)</option>
+                        <option value="medium" selected>Media (Fotos, Ilustraciones)</option>
+                        <option value="high">Alta (Plenos, Fondos oscuros)</option>
+                    </select>
+
+                    <label>Cantidad</label>
+                    <input type="number" id="orderQty" value="1" min="1" oninput="calculatePrice()" required>
+
+                    <div style="text-align:right; margin-bottom:15px; font-weight:bold; color:var(--subli);">
+                        Costo Est: <span id="estimatedCost">$0.00</span>
+                    </div>
+
+                    <button type="submit" class="btn-subli">Registrar Pedido</button>
+                </form>
+            </div>
+        </aside>
+
+        <main>
+            <div class="card">
+                <h2>🚀 Cola de Producción (Kanban)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Detalle</th>
+                            <th>Estado</th>
+                            <th class="text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientOrdersBody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. CONFIGURACIÓN Y RECETAS (BOM)
+    // ==========================================
+    
+    // Lista de Materiales por Modelo
+    const RECIPES = {
+        'remera_basica_blanca': {
+            name: 'Remera Básica Blanca',
+            ingredients: [ { material: 'algodon_blanco', amount: 0.25 } ], // 250g
+            outputPrefix: 'remera_blanca'
+        },
+        'remera_basica_negra': {
+            name: 'Remera Básica Negra',
+            ingredients: [ { material: 'algodon_negro', amount: 0.25 } ],
+            outputPrefix: 'remera_negra'
+        },
+        'remera_raglan_comb': {
+            name: 'Remera Raglan (B/N + Rojo)',
+            ingredients: [
+                { material: 'algodon_blanco', amount: 0.15 }, // Cuerpo
+                { material: 'algodon_negro', amount: 0.10 }, // Mangas
+                { material: 'ribb_rojo', amount: 0.02 }       // Cuello
+            ],
+            outputPrefix: 'remera_raglan'
+        }
+    };
+
+    // Costos base para estimación (Sublimación)
+    const COSTS = {
+        garmentBase: 5.00, // Costo interno contable
+        paperA4: 0.20,
+        paperA3: 0.40,
+        inkUnit: 1.50, // Costo referencia por unidad de tinta
+        satMult: { low: 0.5, medium: 1.0, high: 1.8 }
+    };
+
+    // ==========================================
+    // 2. GESTIÓN DE BASE DE DATOS (LocalStorage)
+    // ==========================================
+    const DB_KEY = 'erp_textil_v4';
+
+    function getDB() {
+        const data = localStorage.getItem(DB_KEY);
+        if (!data) return initDB();
+        return JSON.parse(data);
+    }
+
+    function saveDB(data) {
+        localStorage.setItem(DB_KEY, JSON.stringify(data));
+        renderAll();
+    }
+
+    function initDB() {
+        return {
+            rawMaterials: { 
+                algodon_blanco: 50.0, 
+                algodon_negro: 30.0,
+                ribb_rojo: 5.0,
+                ribb_negro: 5.0
+            },
+            finishedGoods: { 
+                remera_blanca_M: 10,
+                remera_negra_L: 5
+            },
+            supplies: { 
+                papel_a4: 100, 
+                papel_a3: 50,
+                tinta_ml: 500 
+            },
+            cutOrders: [],
+            clientOrders: []
+        };
+    }
+
+    function resetSystem() {
+        if(confirm("¿Estás seguro de borrar todos los datos?")) {
+            localStorage.removeItem(DB_KEY);
+            location.reload();
+        }
+    }
+
+    // ==========================================
+    // 3. LÓGICA DE CONFECCIÓN (Tab 1)
+    // ==========================================
+
+    function addRawMaterial() {
+        const db = getDB();
+        const type = document.getElementById('fabricIngressType').value;
+        const qty = parseFloat(document.getElementById('fabricIngressQty').value);
+        if (qty > 0) {
+            if (!db.rawMaterials[type]) db.rawMaterials[type] = 0;
+            db.rawMaterials[type] += qty;
+            saveDB(db);
+            alert("Stock ingresado correctamente.");
+        }
+    }
+
+    function calculateRequirements() {
+        const db = getDB();
+        const modelKey = document.getElementById('modelSelect').value;
+        const qty = parseInt(document.getElementById('targetQty').value) || 0;
+        const listDiv = document.getElementById('reqList');
+        const btn = document.getElementById('btnCreateCut');
+
+        if (qty <= 0) {
+            listDiv.innerHTML = 'Ingresa una cantidad mayor a 0';
+            btn.disabled = true;
+            return;
+        }
+
+        const recipe = RECIPES[modelKey];
+        let html = '';
+        let possible = true;
+
+        recipe.ingredients.forEach(ing => {
+            const needed = ing.amount * qty;
+            const stock = db.rawMaterials[ing.material] || 0;
+            const hasStock = stock >= needed;
+            
+            if (!hasStock) possible = false;
+
+            const colorClass = hasStock ? 'req-ok' : 'req-bad';
+            const icon = hasStock ? '✔' : '⚠️';
+            
+            html += `
+                <div class="req-item ${colorClass}">
+                    <span>${icon} ${ing.material.replace('_',' ')}</span>
+                    <span>${needed.toFixed(1)}kg / ${stock.toFixed(1)}kg</span>
+                </div>
+            `;
+        });
+
+        listDiv.innerHTML = html;
+        btn.disabled = !possible;
+    }
+
+    function createCutOrder(e) {
+        e.preventDefault();
+        const db = getDB();
+        
+        const modelKey = document.getElementById('modelSelect').value;
+        const qty = parseInt(document.getElementById('targetQty').value);
+        
+        // Obtener curva
+        const s = parseInt(document.getElementById('sizeS').value) || 0;
+        const m = parseInt(document.getElementById('sizeM').value) || 0;
+        const l = parseInt(document.getElementById('sizeL').value) || 0;
+        const xl = parseInt(document.getElementById('sizeXL').value) || 0;
+
+        if ((s+m+l+xl) !== qty) {
+            alert(`La suma de talles (${s+m+l+xl}) no coincide con el total (${qty})`);
+            return;
+        }
+
+        // Descontar Materiales
+        const recipe = RECIPES[modelKey];
+        recipe.ingredients.forEach(ing => {
+            db.rawMaterials[ing.material] -= (ing.amount * qty);
+        });
+
+        // Crear Orden
+        db.cutOrders.push({
+            id: Date.now(),
+            modelName: recipe.name,
+            outputPrefix: recipe.outputPrefix,
+            curve: {S:s, M:m, L:l, XL:xl},
+            qty: qty,
+            status: 'en_proceso'
+        });
+
+        saveDB(db);
+        document.getElementById('cutOrderForm').reset();
+        calculateRequirements();
+    }
+
+    function finishCutOrder(id) {
+        const db = getDB();
+        const order = db.cutOrders.find(o => o.id === id);
+        if (!order) return;
+
+        // Convertir Orden de Corte -> Stock Terminado
+        const prefix = order.outputPrefix;
+        
+        ['S','M','L','XL'].forEach(size => {
+            const key = `${prefix}_${size}`;
+            const qty = order.curve[size];
+            if (qty > 0) {
+                if (!db.finishedGoods[key]) db.finishedGoods[key] = 0;
+                db.finishedGoods[key] += qty;
+            }
+        });
+
+        order.status = 'finalizado';
+        saveDB(db);
+    }
+
+    // ==========================================
+    // 4. LÓGICA DE SUBLIMACIÓN (Tab 2)
+    // ==========================================
+
+    function calculatePrice() {
+        const qty = parseInt(document.getElementById('orderQty').value) || 1;
+        const size = document.getElementById('designSize').value;
+        const sat = document.getElementById('inkSaturation').value;
+
+        // Cálculo de costo estimado
+        const paperCost = (size === 'a4') ? COSTS.paperA4 : COSTS.paperA3;
+        const inkCost = COSTS.inkUnit * ((size === 'a3')?2:1) * COSTS.satMult[sat];
+        
+        // Costo = (PrendaBase + Papel + Tinta) * Cantidad
+        // Nota: Esto es solo costo de MATERIALES para referencia visual
+        const total = (COSTS.garmentBase + paperCost + inkCost) * qty;
+        
+        document.getElementById('estimatedCost').innerText = `$${total.toFixed(2)}`;
+    }
+
+    function createClientOrder(e) {
+        e.preventDefault();
+        const db = getDB();
+        
+        const garmentKey = document.getElementById('baseGarmentSelect').value;
+        const qty = parseInt(document.getElementById('orderQty').value);
+
+        // Validar Stock Prenda
+        if (!db.finishedGoods[garmentKey] || db.finishedGoods[garmentKey] < qty) {
+            alert("❌ No hay stock suficiente de la prenda seleccionada.");
+            return;
+        }
+
+        // Reservar Prenda
+        db.finishedGoods[garmentKey] -= qty;
+
+        db.clientOrders.push({
+            id: Date.now(),
+            client: document.getElementById('clientName').value,
+            garment: garmentKey,
+            qty: qty,
+            design: {
+                size: document.getElementById('designSize').value,
+                sat: document.getElementById('inkSaturation').value
+            },
+            status: 'pendiente'
+        });
+
+        saveDB(db);
+        document.getElementById('clientOrderForm').reset();
+        calculatePrice();
+    }
+
+    function deliverOrder(id) {
+        const db = getDB();
+        const order = db.clientOrders.find(o => o.id === id);
+        
+        // Descontar Insumos Sublimación
+        const isA3 = order.design.size === 'a3';
+        const paperKey = isA3 ? 'papel_a3' : 'papel_a4';
+        
+        if (db.supplies[paperKey] < order.qty) {
+            alert("⚠️ Alerta: Stock de papel negativo.");
+        }
+
+        db.supplies[paperKey] -= order.qty;
+        
+        // Tinta (Estimación ML)
+        const inkFactor = isA3 ? 2 : 1;
+        const satFactor = COSTS.satMult[order.design.sat];
+        db.supplies.tinta_ml -= (inkFactor * satFactor * order.qty * 2); // 2ml base factor
+
+        order.status = 'entregado';
+        saveDB(db);
+    }
+
+    // ==========================================
+    // 5. RENDERIZADO UI
+    // ==========================================
+
+    function renderAll() {
+        const db = getDB();
+
+        // --- TAB 1 ---
+        // Llenar Select Modelos (si vacío)
+        const modelSelect = document.getElementById('modelSelect');
+        if (modelSelect.options.length === 0) {
+            Object.keys(RECIPES).forEach(key => {
+                modelSelect.add(new Option(RECIPES[key].name, key));
+            });
+        }
+
+        // Listar Materias Primas
+        const matList = document.getElementById('rawMaterialList');
+        matList.innerHTML = '';
+        for (let [k, v] of Object.entries(db.rawMaterials)) {
+            matList.innerHTML += `<div class="stock-item"><span>${k.replace('_',' ')}</span> <span class="stock-val">${v.toFixed(1)} kg</span></div>`;
+        }
+
+        // Tabla Cortes
+        const cutTable = document.getElementById('cutTableBody');
+        cutTable.innerHTML = '';
+        db.cutOrders.forEach(o => {
+            if (o.status === 'finalizado') return; // Opcional: ocultar finalizados
+            
+            cutTable.innerHTML += `
+                <tr>
+                    <td>${o.modelName}<br><small>Total: ${o.qty}</small></td>
+                    <td>S:${o.curve.S} M:${o.curve.M} L:${o.curve.L} XL:${o.curve.XL}</td>
+                    <td><span class="badge badge-process">En Proceso</span></td>
+                    <td class="text-right">
+                        <button class="btn-sm btn-success" onclick="finishCutOrder(${o.id})">Finalizar ✔</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        // Stock Productos Terminados
+        const goodsList = document.getElementById('finishedGoodsList');
+        const garmentSelect = document.getElementById('baseGarmentSelect');
+        
+        goodsList.innerHTML = '';
+        garmentSelect.innerHTML = '';
+        
+        for (let [k, v] of Object.entries(db.finishedGoods)) {
+            // Visual
+            goodsList.innerHTML += `<div class="stock-item"><span>${k.replace(/_/g, ' ')}</span> <span class="stock-val">${v} u.</span></div>`;
+            // Select
+            if (v > 0) garmentSelect.add(new Option(`${k} (Disp: ${v})`, k));
+        }
+
+        // --- TAB 2 ---
+        // Insumos Sublimación
+        const suppliesList = document.getElementById('suppliesList');
+        suppliesList.innerHTML = `
+            <div class="stock-item"><span>Papel A4</span> <span class="stock-val">${db.supplies.papel_a4} hj</span></div>
+            <div class="stock-item"><span>Papel A3</span> <span class="stock-val">${db.supplies.papel_a3} hj</span></div>
+            <div class="stock-item"><span>Tinta (Est.)</span> <span class="stock-val">${db.supplies.tinta_ml.toFixed(0)} ml</span></div>
+        `;
+
+        // Tabla Pedidos Clientes
+        const orderTable = document.getElementById('clientOrdersBody');
+        orderTable.innerHTML = '';
+        db.clientOrders.forEach(o => {
+            if (o.status === 'entregado') return;
+
+            orderTable.innerHTML += `
+                <tr>
+                    <td>${o.client}</td>
+                    <td>${o.qty}x ${o.garment}<br><small>Diseño: ${o.design.size.toUpperCase()}</small></td>
+                    <td><span class="badge badge-pending">Pendiente</span></td>
+                    <td class="text-right">
+                        <button class="btn-sm btn-subli" onclick="deliverOrder(${o.id})">Entregar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function switchTab(tabName, btn) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // Init
+    document.getElementById('cutOrderForm').addEventListener('submit', createCutOrder);
+    document.getElementById('clientOrderForm').addEventListener('submit', createClientOrder);
+    
+    // Start
+    renderAll();
+    calculateRequirements();
+    calculatePrice();
+
+</script>
+</body>
+</html>
